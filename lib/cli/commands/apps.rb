@@ -376,13 +376,18 @@ module VMC::Cli::Command
         upload_app_bits(appname, @path, infra)
         restart appname if app[:state] == 'STARTED'
       else
-        each_app do |name|
+        found_app = false
+        each_app(false) do |name|
+          found_app = true
           display "Updating application '#{name}'..."
 
           app = client.app_info(name)
           infra = app[:infra] ? app[:infra][:provider] : nil
           upload_app_bits(name, @application, infra)
           restart name if app[:state] == 'STARTED'
+        end
+        if !found_app
+          err "No applications found.\nEither specify an app on the command line, or in 'manifest.yml'."
         end
       end
     end
